@@ -5,15 +5,16 @@
 Esta función es la encargada de determinar si un genoma, pertenece a un humano o a un mutante, para esto tenemos que chequear si en la matriz de bases, existe mas de una secuencia consecutiva de N (desde ahora en mas MinimumSequenceLength) bases en forma vertical, horizontal u oblicua.
 
 Algunos helpers que nos ayudan a implementar IsMutant
-  
- func checkBases(
+
+    func checkBases(
+
 m *models.Genome,
 getter func(m *models.Genome, i int ) string,
 qtyBases int,
 matches chan<- bool,
 shutdown <-chan struct{}
 )
-  
+
 checkBases es una high order function que recibe un genoma, una función getter para extraer las bases del Genoma, la cantidad de bases a extraer, y dos canales, uno para publicar los resultados y otro parar cancelar la goroutine si la función IsMutant ya determino la mutantosidad (?) del genoma.
 
     func getDiagonalsNESO (g *models.Genome, i int) string

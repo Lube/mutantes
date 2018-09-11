@@ -8,7 +8,7 @@ Podemos cambiar el puerto y la DSN de redis en config/app.yml
 
 Si tenemos make instalado podemos compilar con make build o ejecutar los tests con make test, de lo contrario podemos hacer go build en la raiz del proyecto.
 
-# Deppendencias
+# Dependencias
 
 - Routing framework: [ozzo-routing](https://github.com/go-ozzo/ozzo-routing)
 - Database: [redis-go](https://github.com/redis/redis-go)
