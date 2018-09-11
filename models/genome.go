@@ -59,10 +59,14 @@ type Stats struct {
 func NewStats(countHumans int64, countMutants int64) *Stats {
 	var ratio float64
 
-	if countHumans+countMutants == 0 {
+	if countHumans == 0 && countMutants == 0 {
+		ratio = 0
+	} else if countHumans == 0 {
+		ratio = 1
+	} else if countMutants == 0 {
 		ratio = 0
 	} else {
-		ratio = float64(countMutants) / (float64(countMutants) + float64(countHumans))
+		ratio = float64(countMutants) / float64(countHumans)
 	}
 
 	return &Stats{

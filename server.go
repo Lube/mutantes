@@ -15,6 +15,8 @@ import (
 	"github.com/lube/mutantes/daos"
 	"github.com/lube/mutantes/errors"
 	"github.com/lube/mutantes/services"
+
+	"github.com/go-ozzo/ozzo-routing/file"
 )
 
 func main() {
@@ -62,6 +64,7 @@ func buildRouter(logger *logrus.Logger, db *redis.Client) *routing.Router {
 	genomeDAO := daos.NewGenomeDAO()
 	genomeAnalizer := components.NewGenomeAnalizer()
 	apis.ServeGenomeResource(router, services.NewGenomeService(genomeDAO, genomeAnalizer))
+	router.Get("/loaderio-6dc123f15883e72366e470f7e85b268e.html", file.Content("loaderio.html"))
 
 	return router
 }

@@ -28,7 +28,7 @@ func TestGenome(t *testing.T) {
 			"AGAAGG",
 			"CCTCTA",
 			"CCTCTA"
-		]}`, http.StatusOK, `false`},
+		]}`, http.StatusForbidden, `{"error_code":"FORBIDDEN", "message":"FORBIDDEN"}`},
 		{"t3 - analyze a mutant genome", "POST", "/mutant", `{"dna":[
 			"ATGCGA",
 			"AAGTGC",
@@ -52,7 +52,7 @@ func TestGenome(t *testing.T) {
 		{"t7 - get stats", "GET", "/stats", ``, http.StatusOK, `{
 			"count_mutant_dna": 2,
 			"count_human_dna": 1,
-			"ratio": 0.66
+			"ratio": 2
 		}`},
 	})
 }

@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/lube/mutantes/app"
+	"github.com/lube/mutantes/errors"
 	"github.com/lube/mutantes/models"
 )
 
@@ -31,9 +32,13 @@ func (s *GenomeService) Analize(rs app.RequestScope, genome *models.Genome) (boo
 		return false, err
 	}
 
-	s.dao.Insert(rs, genome, s.analizer.IsMutant(genome))
+	if s.analizer.IsMutant(genome) {
+		s.dao.Insert(rs, genome, true)
+		return true, nil
+	}
 
-	return s.analizer.IsMutant(genome), nil
+	s.dao.Insert(rs, genome, false)
+	return false, errors.NotAMutant()
 }
 
 // Stats returns the number of genomes.

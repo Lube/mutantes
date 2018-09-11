@@ -31,7 +31,7 @@ func LoadConfig(configPaths ...string) error {
 	v.SetEnvPrefix("meli")
 	v.AutomaticEnv()
 	v.SetDefault("error_file", "config/errors.yaml")
-	v.SetDefault("server_port", 8080)
+	v.SetDefault("server_port", 80)
 	for _, path := range configPaths {
 		v.AddConfigPath(path)
 	}

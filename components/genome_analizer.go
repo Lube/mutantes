@@ -7,6 +7,9 @@ import (
 	"github.com/lube/mutantes/models"
 )
 
+// MinimumSequenceLength of mutant dna
+const MinimumSequenceLength = 4
+
 // GenomeAnalizer provides component related to logic analyzing genomes.
 type GenomeAnalizer struct {
 	mutantChecker *regexp.Regexp
@@ -18,66 +21,86 @@ func NewGenomeAnalizer() *GenomeAnalizer {
 	return &GenomeAnalizer{mutantChecker}
 }
 
-// IsMutant Stats returns the number of genomes.
+// IsMutant Revisar documentación complementaria ./IsMutant.md
 func (component *GenomeAnalizer) IsMutant(m *models.Genome) bool {
-	var columnBases []string
-	for i := 0; i < len(m.Bases); i++ {
-		columnBases = append(columnBases, strings.Join(fmap(m.Bases, func(b string) string {
-			return b[i : i+1]
-		}), ""))
+	sequences := 0
+	shutdown := make(chan struct{})
+	matches := make(chan bool)
+
+	if len(m.Bases) < 4 {
+		return false
 	}
 
-	var diagonalBases []string
-	if len(m.Bases) >= 4 {
-		ultimoIndice := len(m.Bases) - 1
-		var diagonalPrincipal string
-		var diagonalInvertida string
-		// X   0   0   0   Y
-		// 0   X   0   Y   0
-		// 0   0  X/Y  0   0
-		// 0   Y   0   X   0
-		// Y   0   0   0   X
-		for i := 0; i < len(m.Bases); i++ {
-			diagonalPrincipal = diagonalPrincipal + string(m.Bases[i][i])
-			diagonalInvertida = diagonalInvertida + string(m.Bases[i][ultimoIndice-i])
+	// rows
+	go component.checkBases(m, getRows, len(m.Bases), matches, shutdown)
+
+	// columns
+	go component.checkBases(m, getColumns, len(m.Bases), matches, shutdown)
+
+	// Para toda matriz de NxN existen al menos
+	// N - (longitud minima de diagonal) * 2 diagonales + 1
+	qtyDiagonals := (len(m.Bases)-MinimumSequenceLength)*2 + 1
+	go component.checkBases(m, getDiagonalsNESO, qtyDiagonals, matches, shutdown)
+	go component.checkBases(m, getDiagonalsNOSE, qtyDiagonals, matches, shutdown)
+
+	// Procesamos secuencias de diagonales, filas y columnas
+	for i := 0; i < qtyDiagonals*2+len(m.Bases)*2; i++ {
+		if <-matches {
+			sequences = sequences + 1
 		}
-		diagonalBases = append(diagonalBases, diagonalPrincipal, diagonalInvertida)
 
-		// Para toda matriz de NxN existen al menos
-		// N - (longitud minima de diagonal) * 2 diagonales
-		// mas las diagonales principales
-		for i := 0; i < (len(m.Bases) - 4); i++ {
-			x := 1 + i
-			y := 0
-
-			var diagonalNOSETop string
-			var diagonalNESOTop string
-			var diagonalNOSEBottom string
-			var diagonalNESOBottom string
-			// j == Cantidad de elementos en una diagonal (N - (i+1) )
-			// donde i es la enesima diagonal, o la coordenada x + 1 del
-			// primer elemento de la diagonal
-			for j := 0; j < len(m.Bases)-(i+1); j++ {
-				diagonalNOSETop = diagonalNOSETop + string(m.Bases[y+j][x+j])
-				diagonalNESOTop = diagonalNESOTop + string(m.Bases[y+j][ultimoIndice-(x+j)])
-				diagonalNOSEBottom = diagonalNOSEBottom + string(m.Bases[x+j][y+j])
-				diagonalNESOBottom = diagonalNESOBottom + string(m.Bases[x+j][ultimoIndice-(y+j)])
-			}
-
-			diagonalBases = append(diagonalBases, diagonalNOSETop, diagonalNOSEBottom, diagonalNESOTop, diagonalNESOBottom)
+		if sequences == 2 {
+			close(shutdown)
+			return true
 		}
 	}
 
-	sequences := []string{}
-	sequences = append(sequences, m.Bases...)
-	sequences = append(sequences, columnBases...)
-	sequences = append(sequences, diagonalBases...)
+	return false
+}
 
-	sequences = filter(sequences, func(b string) bool {
-		return component.mutantChecker.MatchString(b)
-	})
+func (component *GenomeAnalizer) checkBases(m *models.Genome, getter func(m *models.Genome, i int) string, qtyBases int, matches chan<- bool, shutdown <-chan struct{}) {
+	for i := 0; i < qtyBases; i++ {
+		matches <- component.mutantChecker.MatchString(getter(m, i))
+		select {
+		case <-shutdown:
+			return
+		default:
+		}
+	}
+}
 
-	return len(sequences) > 1
+func getDiagonalsNESO(g *models.Genome, i int) string {
+	N := len(g.Bases)
+	p := MinimumSequenceLength + i - 1
+
+	var diagonal string
+	for q := max(0, p-N+1); q <= min(p, N-1); q++ {
+		diagonal = diagonal + string(g.Bases[p-q][q])
+	}
+
+	return diagonal
+}
+
+func getDiagonalsNOSE(g *models.Genome, i int) string {
+	N := len(g.Bases)
+	p := MinimumSequenceLength + i - 1
+
+	var diagonal string
+	for q := max(0, p-N+1); q <= min(p, N-1); q++ {
+		diagonal = diagonal + string(g.Bases[p-q][N-1-q])
+	}
+
+	return diagonal
+}
+
+func getRows(g *models.Genome, i int) string {
+	return g.Bases[i]
+}
+
+func getColumns(g *models.Genome, i int) string {
+	return strings.Join(fmap(g.Bases, func(b string) string {
+		return b[i : i+1]
+	}), "")
 }
 
 func filter(vs []string, f func(string) bool) []string {
@@ -96,4 +119,18 @@ func fmap(vs []string, f func(string) string) []string {
 		vsm[i] = f(v)
 	}
 	return vsm
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

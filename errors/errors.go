@@ -22,6 +22,11 @@ func NotFound(resource string) *APIError {
 	return NewAPIError(http.StatusNotFound, "NOT_FOUND", Params{"resource": resource})
 }
 
+// NotAMutant creates a new API error representing a mutant-not-found error (HTTP 403)
+func NotAMutant() *APIError {
+	return NewAPIError(http.StatusForbidden, "FORBIDDEN", Params{})
+}
+
 // Unauthorized creates a new API error representing an authentication failure (HTTP 401)
 func Unauthorized(err string) *APIError {
 	return NewAPIError(http.StatusUnauthorized, "UNAUTHORIZED", Params{"error": err})

@@ -10,6 +10,7 @@ import (
 func TestGenomeAnalizer(t *testing.T) {
 	ga := NewGenomeAnalizer()
 
+	// Secuencias horizontales y verticales
 	res := ga.IsMutant(&models.Genome{
 		Bases: []string{
 			"ATGCGA",
@@ -23,6 +24,7 @@ func TestGenomeAnalizer(t *testing.T) {
 
 	assert.Equal(t, res, true)
 
+	// Sin secuencias validas
 	res = ga.IsMutant(&models.Genome{
 		Bases: []string{
 			"ATGCGA",
@@ -31,6 +33,30 @@ func TestGenomeAnalizer(t *testing.T) {
 			"AGAAGG",
 			"CCTCTA",
 			"TCACTG",
+		},
+	})
+
+	assert.Equal(t, res, false)
+
+	// Secuencias oblicuas
+	res = ga.IsMutant(&models.Genome{
+		Bases: []string{
+			"ATGCGG",
+			"GATTGC",
+			"AAGGGA",
+			"AGGGAG",
+			"CCGCTA",
+			"TGACTG",
+		},
+	})
+
+	// 3 x 3
+	assert.Equal(t, res, true)
+	res = ga.IsMutant(&models.Genome{
+		Bases: []string{
+			"CGG",
+			"TGC",
+			"GGA",
 		},
 	})
 
