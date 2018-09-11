@@ -7,13 +7,12 @@ Esta función es la encargada de determinar si un genoma, pertenece a un humano 
 Algunos helpers que nos ayudan a implementar IsMutant
 
     func checkBases(
-
-m *models.Genome,
-getter func(m *models.Genome, i int ) string,
-qtyBases int,
-matches chan<- bool,
-shutdown <-chan struct{}
-)
+        m *models.Genome,
+        getter func(m *models.Genome, i int ) string,
+        qtyBases int,
+        matches chan<- bool,
+        shutdown <-chan struct{}
+    )
 
 checkBases es una high order function que recibe un genoma, una función getter para extraer las bases del Genoma, la cantidad de bases a extraer, y dos canales, uno para publicar los resultados y otro parar cancelar la goroutine si la función IsMutant ya determino la mutantosidad (?) del genoma.
 
