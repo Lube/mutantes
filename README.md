@@ -42,4 +42,4 @@ El punto de entrada de la aplicación es el archivo `server.go`. Que hace lo sig
 - instancia servicios e inyecta dependencias
 - inicia el servidor http
 
-Documentación adicional en components/IsMutant.md
+Documentación adicional en [components/IsMutant.md](https://github.com/Lube/mutantes/blob/master/components/IsMutant.md)
