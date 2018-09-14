@@ -13,7 +13,8 @@ var Config appConfig
 type appConfig struct {
 	ErrorFile  string `mapstructure:"error_file"`
 	ServerPort int    `mapstructure:"server_port"`
-	DSN        string `mapstructure:"dsn"`
+	DSN        string `mapstructure:"redis_dsn"`
+	Network    string `mapstructure:"redis_network"`
 }
 
 func (config appConfig) Validate() error {
@@ -31,6 +32,7 @@ func LoadConfig(configPaths ...string) error {
 	v.SetEnvPrefix("meli")
 	v.AutomaticEnv()
 	v.SetDefault("error_file", "config/errors.yaml")
+	v.SetDefault("redis_network", "tcp")
 	v.SetDefault("server_port", 80)
 	for _, path := range configPaths {
 		v.AddConfigPath(path)

@@ -31,6 +31,7 @@ func main() {
 	logger := logrus.New()
 
 	db := redis.NewClient(&redis.Options{
+		Network:  app.Config.Network,
 		Addr:     app.Config.DSN,
 		Password: "", // no password set
 		DB:       0,  // use default DB

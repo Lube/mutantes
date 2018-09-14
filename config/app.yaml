@@ -1,4 +1,5 @@
 # The Data Source Name for the database
-# Make sure you override this in production with the environment variable: RESTFUL_DSN
-dsn: "localhost:6379"
+# Make sure you override this in production with the environment variable: MELI_DSN
+redis_network: "tcp"
+redis_dsn: "localhost:6379"
 server_port: 80
